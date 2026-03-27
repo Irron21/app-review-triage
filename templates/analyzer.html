@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analyzer</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding-top: 70px;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .analyzer-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid #e9ecef;
+            padding: 20px 0;
+            color: #6c757d;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #adb5bd;
+            margin: 30px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 1em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 1em;
+        }
+
+        /* Drag and drop zone styling */
+        .drop-zone {
+            max-width: 100%;
+            height: 160px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: "Inter", sans-serif;
+            font-weight: 500;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6c757d;
+            border: 2px dashed #0d6efd;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone--over {
+            border-style: solid;
+            background-color: #e9ecef;
+            color: #0b5ed7;
+        }
+
+        .drop-zone__input {
+            display: none;
+        }
+
+        .drop-zone__thumb {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #e9ecef;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .drop-zone__thumb::after {
+            content: attr(data-label);
+            display: block;
+            margin-top: 10px;
+            font-size: 16px;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand font-weight-bold" href="/">Sentiment Triage</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/analyzer">Analyzer</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="text-center mb-4 mt-4">
+                    <h2 class="fw-bold text-dark">Analyze App Reviews</h2>
+                    <p class="text-muted">Instantly measure user sentiment leveraging deeply integrated SKLearn and
+                        Gemini architectures.</p>
+                </div>
+
+                <div class="card analyzer-card">
+                    <div class="card-body p-5">
+                        <form id="analysisForm" action="/predict" method="post" enctype="multipart/form-data">
+                            <!-- Drag and Drop CSV Mode -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-secondary mb-2">CSV Bulk Ingress</label>
+                                <div class="drop-zone" id="drop-zone">
+                                    <span class="drop-zone__prompt">Drag & Drop your CSV here or click to browse</span>
+                                    <input type="file" name="file" id="csvUpload" class="drop-zone__input"
+                                        accept=".csv">
+                                </div>
+                                <div class="form-text mt-3 text-center text-muted small">
+                                    Format: CSV retaining 'Review' and optionally 'App' arrays. Gemini runs dynamically
+                                    over batches!
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <button type="submit" id="submitBtn"
+                                    class="btn btn-primary btn-lg w-100 shadow-sm fw-bold p-3">
+                                    <span id="btnText">Evaluate Telemetry Payload</span>
+                                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none ms-2"
+                                        role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center">
+        <div class="container small">
+            &copy; 2026 Sentiment Triage. Built for high-scale app feedback telemetry.
+        </div>
+    </footer>
+
+    <!-- Form Submit Spinner and Drag Drop Logic -->
+    <script>
+        document.getElementById('analysisForm').addEventListener('submit', function (e) {
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            btn.classList.add('disabled');
+            btnText.innerText = 'Calculating Classifications & Generating AI Decisions...';
+            btnSpinner.classList.remove('d-none');
+        });
+
+        document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
+            const dropZoneElement = inputElement.closest(".drop-zone");
+
+            dropZoneElement.addEventListener("click", (e) => {
+                inputElement.click();
+            });
+
+            inputElement.addEventListener("change", (e) => {
+                if (inputElement.files.length) {
+                    updateThumbnail(dropZoneElement, inputElement.files[0]);
+                }
+            });
+
+            dropZoneElement.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropZoneElement.classList.add("drop-zone--over");
+            });
+
+            ["dragleave", "dragend"].forEach((type) => {
+                dropZoneElement.addEventListener(type, (e) => {
+                    dropZoneElement.classList.remove("drop-zone--over");
+                });
+            });
+
+            dropZoneElement.addEventListener("drop", (e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files.length) {
+                    inputElement.files = e.dataTransfer.files;
+                    updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+                }
+                dropZoneElement.classList.remove("drop-zone--over");
+            });
+        });
+
+        function updateThumbnail(dropZoneElement, file) {
+            let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+
+            if (dropZoneElement.querySelector(".drop-zone__prompt")) {
+                dropZoneElement.querySelector(".drop-zone__prompt").remove();
+            }
+
+            if (!thumbnailElement) {
+                thumbnailElement = document.createElement("div");
+                thumbnailElement.classList.add("drop-zone__thumb");
+                thumbnailElement.innerHTML = '';
+                dropZoneElement.appendChild(thumbnailElement);
+            }
+
+            thumbnailElement.dataset.label = file.name;
+        }
+    </script>
+</body>
+
+</html>

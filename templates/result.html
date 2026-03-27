@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container result-container">
+        <h1>Analysis Result</h1>
+        <div class="review-box">
+            <h3>Original Review:</h3>
+            <p>{{ review }}</p>
+        </div>
+        <div class="sentiment-box">
+            <h3>Predicted Sentiment:</h3>
+            <p class="sentiment {{ sentiment.lower() }}">{{ sentiment }}</p>
+        </div>
+        <a href="/" class="btn-back">Analyze another review</a>
+    </div>
+</body>
+</html>
