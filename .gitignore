@@ -1,0 +1,28 @@
+# Environment Variables
+.env
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env_dir/
+
+# Datasets
+*.csv
+!test.csv
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exported ML Models
+*.joblib
+*.pkl
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.DS_Store
